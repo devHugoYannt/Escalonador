@@ -27,12 +27,5 @@ class GeradorDeProcessos {
     return new Processo(id, quantidadeInstrucoes);
   }
 }
+export { Processo, GeradorDeProcessos };
 
-// -------- Exemplo de uso --------
-const processo1 = GeradorDeProcessos.gerar();
-console.log("Processo gerado:", processo1);
-
-processo1.executarInstrucao();
-console.log("Após executar 1 instrução:", processo1);
-
-console.log("Está finalizado?", processo1.estaFinalizado());

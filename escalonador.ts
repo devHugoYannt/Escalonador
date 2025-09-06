@@ -79,21 +79,4 @@ class Escalonador {
   }
 }
 
-// -------- Exemplo de uso --------
-const escalonador = new Escalonador("RR", 2);
-
-for (let i = 0; i < 3; i++) {
-  escalonador.adicionarProcesso(GeradorDeProcessos.gerar());
-}
-
-console.log("Fila inicial:", escalonador);
-
-for (let ciclo = 0; ciclo < 20; ciclo++) {
-  const proc = escalonador.proximoProcesso();
-  if (!proc) break;
-
-  proc.executarInstrucao();
-  console.log(`Ciclo ${ciclo + 1}: Executando processo ${proc.id} (${proc.quantidadeInstrucoes} instruções restantes)`);
-
-  escalonador.removerFinalizados();
-}
+export { Processo, GeradorDeProcessos, Escalonador };
