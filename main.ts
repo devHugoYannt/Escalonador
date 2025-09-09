@@ -151,6 +151,7 @@ class CPU {
 
 // -------- Main Simulação --------
 async function main() {
+  // Criando escalonador (RR = Round Robin, FCFS = First-Come First-Served, SJF = Shortest Job First)
   const escalonador = new Escalonador("RR", 3); // quantum = 3
   for (let i = 0; i < 5; i++) {
     escalonador.adicionarProcesso(GeradorDeProcessos.gerar());
