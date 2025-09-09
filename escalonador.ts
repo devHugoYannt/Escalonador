@@ -1,3 +1,5 @@
+
+
 class Processo {
   id: number;
   quantidadeInstrucoes: number;
@@ -28,14 +30,16 @@ class GeradorDeProcessos {
   }
 }
 
+
+
 type Algoritmo = "FCFS" | "SJF" | "RR";
 
 class Escalonador {
   private fila: Processo[] = [];
   private algoritmo: Algoritmo;
-  private quantum: number;
-  private contadorQuantum: number = 0;
   private indiceAtual: number = 0;
+  private contadorQuantum: number = 0;
+  private quantum: number;
 
   constructor(algoritmo: Algoritmo, quantum: number = 3) {
     this.algoritmo = algoritmo;
@@ -51,31 +55,36 @@ class Escalonador {
 
     switch (this.algoritmo) {
       case "FCFS":
-        return this.fila[0] !== undefined ? this.fila[0] : null;
+        return this.fila[0] ?? null;
 
       case "SJF":
         this.fila.sort((a, b) => a.quantidadeInstrucoes - b.quantidadeInstrucoes);
-        return this.fila[0] !== undefined ? this.fila[0] : null;
+        return this.fila[0] ?? null;
 
       case "RR":
-        if (this.indiceAtual >= this.fila.length) return null;
         const processo = this.fila[this.indiceAtual];
         this.contadorQuantum++;
 
-        if (this.contadorQuantum >= this.quantum) {
+        // Troca de processo quando atinge o quantum
+        if (
+          this.contadorQuantum >= this.quantum ||
+          (processo !== undefined && processo.estaFinalizado())
+        ) {
           this.contadorQuantum = 0;
           this.indiceAtual = (this.indiceAtual + 1) % this.fila.length;
         }
 
-        return processo !== undefined ? processo : null;
+        return processo ?? null;
     }
   }
 
   removerFinalizados(): void {
     this.fila = this.fila.filter((p) => !p.estaFinalizado());
-    if (this.indiceAtual >= this.fila.length) {
-      this.indiceAtual = 0;
-    }
+    if (this.indiceAtual >= this.fila.length) this.indiceAtual = 0;
+  }
+
+  temProcessos(): boolean {
+    return this.fila.length > 0;
   }
 }
 

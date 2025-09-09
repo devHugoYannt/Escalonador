@@ -1,5 +1,4 @@
-
-// Entidade Processo
+// -------- Entidade Processo --------
 class Processo {
   id: number;
   quantidadeInstrucoes: number;
@@ -20,8 +19,7 @@ class Processo {
   }
 }
 
-
-// Gerador de Processos
+// -------- Gerador de Processos --------
 class GeradorDeProcessos {
   private static proximoId: number = 1;
 
@@ -32,8 +30,7 @@ class GeradorDeProcessos {
   }
 }
 
-
-// Escalonador
+// -------- Escalonador --------
 type Algoritmo = "FCFS" | "SJF" | "RR";
 
 class Escalonador {
@@ -45,7 +42,7 @@ class Escalonador {
 
   constructor(algoritmo: Algoritmo, quantum: number = 3) {
     this.algoritmo = algoritmo;
-    this.quantum = quantum;
+    this.quantum = Math.max(1, quantum);
   }
 
   adicionarProcesso(processo: Processo): void {
@@ -61,13 +58,16 @@ class Escalonador {
 
       case "SJF":
         this.fila.sort((a, b) => a.quantidadeInstrucoes - b.quantidadeInstrucoes);
-        return this.fila[0] ?? null;;
+        return this.fila[0] ?? null;
 
       case "RR":
         const processo = this.fila[this.indiceAtual];
         this.contadorQuantum++;
 
-        if (this.contadorQuantum >= this.quantum) {
+        if (
+          this.contadorQuantum >= this.quantum ||
+          (processo && processo.estaFinalizado())
+        ) {
           this.contadorQuantum = 0;
           this.indiceAtual = (this.indiceAtual + 1) % this.fila.length;
         }
@@ -78,9 +78,7 @@ class Escalonador {
 
   removerFinalizados(): void {
     this.fila = this.fila.filter((p) => !p.estaFinalizado());
-    if (this.indiceAtual >= this.fila.length) {
-      this.indiceAtual = 0;
-    }
+    if (this.indiceAtual >= this.fila.length) this.indiceAtual = 0;
   }
 
   temProcessos(): boolean {
@@ -88,10 +86,9 @@ class Escalonador {
   }
 }
 
-
-// CPU
+// -------- CPU --------
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 class CPU {
@@ -126,16 +123,24 @@ class CPU {
 
       this.contadorCiclos++;
 
+  
       if (this.processoAtual.estaFinalizado()) {
-        console.log(`Processo P${this.processoAtual.id} finalizado!`);
+        console.log(` Processo P${this.processoAtual.id} finalizado!`);
         this.escalonador.removerFinalizados();
         this.processoAtual = null;
         this.contadorCiclos = 0;
       }
 
+    
       if (this.contadorCiclos >= this.ciclosPorInterrupcao) {
         console.log(`⏸ Interrupção de clock após ${this.contadorCiclos} ciclos.`);
-        this.processoAtual = this.escalonador.proximoProcesso();
+        const proximo = this.escalonador.proximoProcesso();
+
+        if (proximo && proximo !== this.processoAtual) {
+          console.log(`Troca de contexto: de P${this.processoAtual?.id} para P${proximo.id}`);
+          this.processoAtual = proximo;
+        }
+
         this.contadorCiclos = 0;
       }
 
@@ -144,19 +149,15 @@ class CPU {
   }
 }
 
-
 // -------- Main Simulação --------
 async function main() {
-  // Criar escalonador (mude para "FCFS" ou "SJF" se quiser testar)
-  const escalonador = new Escalonador("FCFS", 3);
-
-  // Criar processos
+  const escalonador = new Escalonador("RR", 3); // quantum = 3
   for (let i = 0; i < 5; i++) {
     escalonador.adicionarProcesso(GeradorDeProcessos.gerar());
   }
 
   console.log("Simulação iniciada...");
-  const cpu = new CPU(escalonador, 3);
+  const cpu = new CPU(escalonador, 5); // ciclos antes da interrupção
   await cpu.iniciar();
 }
 
