@@ -45,7 +45,7 @@ class CPU {
       }
 
       if (this.contadorCiclos >= this.ciclosPorInterrupcao) {
-        console.log(`⏸ Interrupção de clock após ${this.contadorCiclos} ciclos.`);
+        console.log(`Interrupção de clock após ${this.contadorCiclos} ciclos.`);
         this.processoAtual = this.escalonador.proximoProcesso();
         this.contadorCiclos = 0;
       }
